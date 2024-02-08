@@ -6,3 +6,5 @@ Terraform module which creates kubernetes resources on AWS.
 
 ```hcl
 ```
+## Include aws addons
+Cluster addons: CoreDNS, Kube-Proxy, and VPC-CNI
