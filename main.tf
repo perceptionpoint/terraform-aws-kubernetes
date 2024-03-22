@@ -29,12 +29,13 @@ module "security" {
 
   vpc_id = var.vpc_id
   eks_cluster_api_allowed_cidr_blocks = var.eks_cluster_api_allowed_cidr_blocks
+  eks_node_allowed_cidr_blocks = var.eks_node_allowed_cidr_blocks
   eks_properties = var.eks_properties
 }
 
 module "aws-eks-addon" {
   source  = "./aws-eks-addon"
-  
+
   eks_properties = var.eks_properties
   addon_properties = var.addon_properties
 }
