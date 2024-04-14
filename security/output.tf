@@ -1,6 +1,10 @@
-# eks cluster iam role arn
+# eks cluster iam role
 output "cluster_iam_role" {
-  value = aws_iam_role.eks-cluster-role.arn
+  value = aws_iam_role.eks-cluster-role
+}
+
+output "node_iam_role" {
+  value = aws_iam_role.eks-node-role
 }
 
 # eks cluster security gourp id
