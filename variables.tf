@@ -23,10 +23,10 @@ variable "node_group_properties" {
     name = string
     subnet_ids = list(string)
     capacity_type = string
+    ami_type = optional(string)
     instance_requirements = object({
       allowed_instance_types = list(string)
-      min_vcpu_count = optional(number, 1)
-      max_vcpu_count = optional(number, null)
+      allowed_instance_size = list(string)
     })
     user_data = string
     imdsv2_enabled = optional(bool, false)
