@@ -16,6 +16,15 @@ variable "eks_node_allowed_cidr_blocks" {
 }
 variable "eks_subnet_ids" { type = list(string) }
 variable "node_iam_role_name" {}
+# variable "node_iam_role_extra_policies" {
+#   type = list(string)
+#   default = []
+# }
+variable "node_iam_role_extra_policies" {
+  type = map(string)
+  default = {}
+}
+
 variable "addon_properties" { type = map(string) }
 variable "node_group_properties" {
   default = {}
@@ -46,4 +55,8 @@ variable "node_group_properties" {
         effect = optional(string, "NO_SCHEDULE")
     }))
   }))
+}
+variable "enable_karpenter_creation" { 
+  type = bool
+  default = false 
 }

@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_eks_cluster" "eks" {
   name     = var.eks_properties["name"]
   version = var.eks_properties["version"]
@@ -32,6 +34,7 @@ module "security" {
   eks_node_allowed_cidr_blocks = var.eks_node_allowed_cidr_blocks
   eks_properties = var.eks_properties
   node_iam_role_name = var.node_iam_role_name
+  node_iam_role_extra_policies = var.node_iam_role_extra_policies
 }
 
 module "aws-eks-addon" {
@@ -51,4 +54,26 @@ module "eks_node_group" {
   eks_node_sg = module.security.eks_node_sg
   eks_cluster_endpoint = aws_eks_cluster.eks.endpoint
   eks_cluster_ca = aws_eks_cluster.eks.certificate_authority.0.data
+}
+
+module "karpenter" {
+  source = "terraform-aws-modules/eks/aws//modules/karpenter"
+  version = "20.8.5"
+
+  cluster_name = aws_eks_cluster.eks.id
+  node_iam_role_name = "KarpenterTF-${aws_eks_cluster.eks.id}"
+
+  # Attach additional IAM policies to the Karpenter node IAM role
+  node_iam_role_additional_policies = merge({
+    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  }, var.node_iam_role_extra_policies)
+
+
+  irsa_oidc_provider_arn = replace(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "arn:aws:iam::${data.aws_caller_identity.current.id}:oidc-provider/")
+
+  create_access_entry = false
+  create_instance_profile = true
+  enable_irsa = true
+
+  count = var.enable_karpenter_creation ? 1 : 0
 }

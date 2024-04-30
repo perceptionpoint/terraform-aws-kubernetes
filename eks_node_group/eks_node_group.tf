@@ -15,7 +15,7 @@ resource "aws_eks_node_group" "node-group" {
   node_role_arn   = var.eks_node_role_arn
   launch_template {
     name = aws_launch_template.launch-template.name
-    version = "$Latest"
+    version = aws_launch_template.launch-template.latest_version
   }
   subnet_ids      = var.node_group_properties["subnet_ids"]
   capacity_type   = var.node_group_properties["capacity_type"]
