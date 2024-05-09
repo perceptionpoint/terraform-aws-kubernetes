@@ -64,9 +64,7 @@ module "karpenter" {
   node_iam_role_name = "KarpenterTF-${aws_eks_cluster.eks.id}"
 
   # Attach additional IAM policies to the Karpenter node IAM role
-  node_iam_role_additional_policies = merge({
-    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  }, var.node_iam_role_extra_policies)
+  node_iam_role_additional_policies = var.node_iam_role_extra_policies
 
 
   irsa_oidc_provider_arn = replace(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "arn:aws:iam::${data.aws_caller_identity.current.id}:oidc-provider/")

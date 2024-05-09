@@ -22,6 +22,11 @@ resource aws_launch_template "launch-template" {
     http_put_response_hop_limit = 2
     http_tokens = var.node_group_properties["imdsv2_enabled"]? "required" : "optional"
   }
+  tag_specifications {
+    resource_type = "instance"
+    tags = var.node_group_properties["tags"]
+  }
+
   dynamic "block_device_mappings" {
     for_each = var.node_group_properties["block_device_mappings"]
     content {
