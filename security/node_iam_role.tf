@@ -18,15 +18,16 @@ POLICY
 }
 
 locals {
-  eks_node_policies = [
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  ]
+  eks_node_policies = merge({
+    AmazonEKSWorkerNodePolicy = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    AmazonEKS_CNI_Policy = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  }, var.node_iam_role_extra_policies)
 }
 
+
 resource "aws_iam_role_policy_attachment" "eks-node-policies-attachement" {
-  policy_arn = element(local.eks_node_policies, count.index)
+  for_each = local.eks_node_policies
+  policy_arn = each.value
   role       = aws_iam_role.eks-node-role.name
-  count = length(local.eks_node_policies)
 }

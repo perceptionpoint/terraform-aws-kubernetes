@@ -16,11 +16,17 @@ EOF
 resource aws_launch_template "launch-template" {
   user_data =  "${base64encode(local.user_data)}"
   vpc_security_group_ids = [var.eks_node_sg]
+  update_default_version = true
   metadata_options {
     http_protocol_ipv6 = "disabled"
     http_put_response_hop_limit = 2
     http_tokens = var.node_group_properties["imdsv2_enabled"]? "required" : "optional"
   }
+  tag_specifications {
+    resource_type = "instance"
+    tags = var.node_group_properties["tags"]
+  }
+
   dynamic "block_device_mappings" {
     for_each = var.node_group_properties["block_device_mappings"]
     content {
