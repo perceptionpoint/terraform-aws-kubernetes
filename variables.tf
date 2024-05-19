@@ -56,3 +56,7 @@ variable "enable_karpenter_creation" {
   type = bool
   default = false 
 }
+variable "karpenter_role_name_extension" { 
+  type = string
+  default = "" 
+}
