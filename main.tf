@@ -61,7 +61,8 @@ module "karpenter" {
   version = "20.8.5"
 
   cluster_name = aws_eks_cluster.eks.id
-  node_iam_role_name = "KarpenterTF-${aws_eks_cluster.eks.id}"
+  node_iam_role_name = "KarpenterNodeRoleTF-${var.karpenter_role_name_extension}"
+  iam_role_name = "KarpenterControllerTF-${var.karpenter_role_name_extension}"
 
   # Attach additional IAM policies to the Karpenter node IAM role
   node_iam_role_additional_policies = var.node_iam_role_extra_policies
