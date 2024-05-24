@@ -20,8 +20,16 @@ variable "node_iam_role_extra_policies" {
   type = map(string)
   default = {}
 }
-
-variable "addon_properties" { type = map(string) }
+variable "addon_properties" {
+  default = {}
+  type = map(object({
+    addon_version = string
+    configuration_values = optional(string)
+    service_account_role_arn = optional(string)
+    resolve_conflicts_on_create = optional(string, "NONE")
+    resolve_conflicts_on_update = optional(string, "NONE")
+  }))
+}
 variable "node_group_properties" {
   default = {}
   type = map(object({

@@ -37,13 +37,6 @@ module "security" {
   node_iam_role_extra_policies = var.node_iam_role_extra_policies
 }
 
-module "aws-eks-addon" {
-  source  = "./aws-eks-addon"
-
-  eks_properties = var.eks_properties
-  addon_properties = var.addon_properties
-}
-
 module "eks_node_group" {
   source = "./eks_node_group"
   for_each = var.node_group_properties
