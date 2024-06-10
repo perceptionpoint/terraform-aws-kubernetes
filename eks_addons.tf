@@ -8,4 +8,8 @@ resource "aws_eks_addon" "eks_addon" {
   service_account_role_arn = each.value["service_account_role_arn"]
   resolve_conflicts_on_create = each.value["resolve_conflicts_on_create"]
   resolve_conflicts_on_update = each.value["resolve_conflicts_on_update"]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
