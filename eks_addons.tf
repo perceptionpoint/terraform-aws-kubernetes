@@ -1,7 +1,7 @@
 resource "aws_eks_addon" "eks_addon" {
   for_each = var.addon_properties
 
-  cluster_name = var.eks_properties["name"]
+  cluster_name = aws_eks_cluster.eks.name
   addon_name = each.key
   addon_version = each.value["addon_version"]
   configuration_values = each.value["configuration_values"]
