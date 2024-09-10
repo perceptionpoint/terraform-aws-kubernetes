@@ -47,6 +47,7 @@ module "eks_node_group" {
   eks_node_sg = module.security.eks_node_sg
   eks_cluster_endpoint = aws_eks_cluster.eks.endpoint
   eks_cluster_ca = aws_eks_cluster.eks.certificate_authority.0.data
+  eks_cluster_version = var.eks_properties["version"]
 }
 
 module "karpenter" {

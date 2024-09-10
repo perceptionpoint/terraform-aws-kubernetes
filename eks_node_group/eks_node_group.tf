@@ -9,6 +9,7 @@ resource "aws_eks_node_group" "node-group" {
   cluster_name    = var.eks_cluster_name
   node_group_name = var.node_group_properties["name"]
   ami_type = can(var.node_group_properties["ami_type"])? var.node_group_properties["ami_type"] : "AL2_x86_64"
+  version = var.eks_cluster_version
   instance_types = length(local.instance_list)>40 ? slice(local.instance_list,0,40) : local.instance_list
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
