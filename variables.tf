@@ -42,7 +42,7 @@ variable "node_group_properties" {
       allowed_instance_size = list(string)
     })
     user_data = string
-    imdsv2_enabled = optional(bool, false)
+    imdsv2_enabled = optional(bool, true)
     block_device_mappings = optional(map(object({
       device_name = string
       ebs = object({
@@ -62,7 +62,7 @@ variable "node_group_properties" {
 }
 variable "enable_karpenter_creation" { 
   type = bool
-  default = false 
+  default = true
 }
 variable "karpenter_role_name_extension" { 
   type = string
