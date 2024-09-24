@@ -10,6 +10,6 @@ resource "aws_eks_addon" "eks_addon" {
   resolve_conflicts_on_update = each.value["resolve_conflicts_on_update"]
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
