@@ -24,7 +24,7 @@ resource aws_launch_template "launch-template" {
   }
   tag_specifications {
     resource_type = "instance"
-    tags = var.node_group_properties["tags"]
+    tags = merge({"kubernetes.io/cluster/${var.eks_cluster_name}" = "owned"}, var.node_group_properties["tags"])
   }
 
   dynamic "block_device_mappings" {
