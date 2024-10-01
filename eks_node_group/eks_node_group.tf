@@ -1,14 +1,17 @@
 locals {
+
+  default_instance_types_amd64 = [ "m5a", "m5ad","m5d", "r4", "r5", "r5a", "r5ad", "r5b", "r5d", "r5dn", "r5n", "c5a", "c5ad", "c5d", "c5n", "m6a", "m6i", "m6id", "m6idn", "m6in", "r6a", "r6i", "r6id", "r6idn", "r6in", "c6a", "c6i", "c6id", "c6in"]
+  default_instance_sizes = ["4xlarge", "8xlarge", "16xlarge"]
   instance_list = flatten([
-    for type in var.node_group_properties["instance_requirements"]["allowed_instance_types"]:[
-      for size in var.node_group_properties["instance_requirements"]["allowed_instance_size"]: "${type}.${size}"
+    for type in try(var.node_group_properties["instance_requirements"]["allowed_instance_types"], local.default_instance_types_amd64):[
+      for size in try(var.node_group_properties["instance_requirements"]["allowed_instance_size"], local.default_instance_sizes): "${type}.${size}"
     ]
   ])
 }
 resource "aws_eks_node_group" "node-group" {
   cluster_name    = var.eks_cluster_name
   node_group_name = var.node_group_properties["name"]
-  ami_type = can(var.node_group_properties["ami_type"])? var.node_group_properties["ami_type"] : "AL2_x86_64"
+  ami_type = var.node_group_properties["ami_type"]
   version = var.eks_cluster_version
   instance_types = length(local.instance_list)>40 ? slice(local.instance_list,0,40) : local.instance_list
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
@@ -20,7 +23,6 @@ resource "aws_eks_node_group" "node-group" {
   }
   subnet_ids      = var.node_group_properties["subnet_ids"]
   capacity_type   = var.node_group_properties["capacity_type"]
-  tags            = var.node_group_properties["tags"]
   labels          = var.node_group_properties["labels"]
   dynamic taint {
     for_each = var.node_group_properties["taints"]
@@ -32,9 +34,9 @@ resource "aws_eks_node_group" "node-group" {
   }
 
   scaling_config {
-    desired_size = 0
-    max_size     = 1
-    min_size     = 0
+    desired_size = var.node_group_properties["min_size"]
+    max_size     = (var.node_group_properties["max_size"] < var.node_group_properties["min_size"])? var.node_group_properties["min_size"] : var.node_group_properties["max_size"]
+    min_size     = var.node_group_properties["min_size"]
   }
   update_config {
     max_unavailable = 1

@@ -33,7 +33,7 @@ resource "aws_security_group_rule" "eks-node-ingress-cluster-api-high-ports" {
   to_port                       = 65535
   protocol                      = "tcp"
   security_group_id             = aws_security_group.eks-node-sg.id
-  source_security_group_id      = aws_security_group.eks-cluster-sg.id
+  source_security_group_id      = var.eks_cluster_security_group_id
   type                          = "ingress"
 }
 
@@ -43,7 +43,7 @@ resource "aws_security_group_rule" "eks-node-ingress-cluster-api-https" {
   to_port                       = 443
   protocol                      = "tcp"
   security_group_id             = aws_security_group.eks-node-sg.id
-  source_security_group_id      = aws_security_group.eks-cluster-sg.id
+  source_security_group_id      = var.eks_cluster_security_group_id
   type                          = "ingress"
 }
 

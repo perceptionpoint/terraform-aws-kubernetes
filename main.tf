@@ -8,7 +8,6 @@ resource "aws_eks_cluster" "eks" {
   enabled_cluster_log_types = [ "authenticator", ]
 
   vpc_config {
-    security_group_ids = [module.security.eks_cluster_sg]
     subnet_ids = var.eks_subnet_ids
 
     endpoint_private_access = true
@@ -30,6 +29,7 @@ module "security" {
   source  = "./security"
 
   vpc_id = var.vpc_id
+  eks_cluster_security_group_id = aws_eks_cluster.eks.vpc_config[0].cluster_security_group_id
   eks_cluster_api_allowed_cidr_blocks = var.eks_cluster_api_allowed_cidr_blocks
   eks_node_allowed_cidr_blocks = var.eks_node_allowed_cidr_blocks
   eks_properties = var.eks_properties
@@ -37,17 +37,15 @@ module "security" {
   node_iam_role_extra_policies = var.node_iam_role_extra_policies
 }
 
-module "eks_node_group" {
-  source = "./eks_node_group"
-  for_each = var.node_group_properties
+module "eks-addons" {
+  source = "./eks_addons"
+  depends_on = [
+    module.eks_node_group
+  ]
 
-  node_group_properties = each.value
-  eks_cluster_name = aws_eks_cluster.eks.name
-  eks_node_role_arn = module.security.node_iam_role.arn
-  eks_node_sg = module.security.eks_node_sg
-  eks_cluster_endpoint = aws_eks_cluster.eks.endpoint
-  eks_cluster_ca = aws_eks_cluster.eks.certificate_authority.0.data
-  eks_cluster_version = var.eks_properties["version"]
+  core_addon_properties = var.core_addon_properties
+  eks_cluster_name = var.eks_properties["name"]
+  oidc_provider = aws_iam_openid_connect_provider.oidc-provider
 }
 
 module "karpenter" {
