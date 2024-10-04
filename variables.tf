@@ -24,7 +24,7 @@ variable "core_addon_properties" {
   default = {}
   type = map(object({
     addon_version = optional(string)
-    configuration_values = map(any)
+    configuration_values = optional(map(any), {})
   }))
 }
 variable "core_node_group_properties" {
