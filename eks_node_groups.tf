@@ -21,7 +21,7 @@ locals {
         allowed_instance_types = ["t3"]
         allowed_instance_size = ["medium"]
       }
-      min_size = 1
+      min_size = 2
       tags = var.core_node_group_properties["coredns"]["tags"]
       labels = { componentType = "coredns" }
       taints = [{ key = "perception-point.io/coredns" }]
@@ -31,7 +31,7 @@ locals {
       name = "karpenter-node"
       subnet_ids = var.core_node_group_properties["karpenter-node"]["subnet_ids"]
       capacity_type = "ON_DEMAND"
-      min_size = 1
+      min_size = 2
       tags = var.core_node_group_properties["karpenter-node"]["tags"]
       labels = { componentType = "karpenter-node" }
       taints = [{ key = "perception-point.io/karpenter-node" }]
@@ -41,6 +41,7 @@ locals {
       name = "system-critical"
       subnet_ids = var.core_node_group_properties["system-critical"]["subnet_ids"]
       capacity_type = "ON_DEMAND"
+      min_size = 1
       tags = var.core_node_group_properties["system-critical"]["tags"]
       labels = { componentType = "system-critical" }
       taints = [{ key = "perception-point.io/system-critical" }]
