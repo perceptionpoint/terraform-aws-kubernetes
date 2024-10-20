@@ -5,3 +5,4 @@ variable "eks_node_allowed_cidr_blocks" { type = map(string) }
 variable "eks_properties" {}
 variable "node_iam_role_name" {}
 variable "node_iam_role_extra_policies" {type = map(string)}
+variable "describe_eks_endpoints_assuming_account_id" {}

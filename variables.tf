@@ -46,3 +46,17 @@ variable "karpenter_role_name_extension" {
   type = string
   default = ""
 }
+variable "kubeconfig_metadata_output_file" {
+  type = string
+  default = null
+}
+
+variable "kubeconfig_cluster_aliases" {
+  type = list(string)
+  default = []
+}
+
+variable "describe_eks_endpoints_assuming_account_id" {
+  type = string
+  default = null
+}

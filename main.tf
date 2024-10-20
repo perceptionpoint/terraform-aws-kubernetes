@@ -35,6 +35,7 @@ module "security" {
   eks_properties = var.eks_properties
   node_iam_role_name = var.node_iam_role_name
   node_iam_role_extra_policies = var.node_iam_role_extra_policies
+  describe_eks_endpoints_assuming_account_id = var.describe_eks_endpoints_assuming_account_id
 }
 
 module "eks-addons" {
@@ -67,4 +68,18 @@ module "karpenter" {
   enable_irsa = true
 
   count = var.enable_karpenter_creation ? 1 : 0
+}
+
+data "aws_region" "current" {}
+
+resource "local_file" "kubeconfig_metadata_output_file" {
+  count = var.kubeconfig_metadata_output_file == null ? 0 : 1
+
+  filename = var.kubeconfig_metadata_output_file
+  content = yamlencode({
+    "cluster_name": var.eks_properties["name"],
+    "cluster_region": data.aws_region.current.name,
+    "assume_role": module.security.DescribeEksEndpointsRoleArn,
+    "aliases": var.kubeconfig_cluster_aliases
+  })
 }
