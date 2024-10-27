@@ -2,9 +2,11 @@ locals {
 
   default_instance_types_amd64 = [ "m5a", "m5ad","m5d", "r4", "r5", "r5a", "r5ad", "r5b", "r5d", "r5dn", "r5n", "c5a", "c5ad", "c5d", "c5n", "m6a", "m6i", "m6id", "m6idn", "m6in", "r6a", "r6i", "r6id", "r6idn", "r6in", "c6a", "c6i", "c6id", "c6in"]
   default_instance_sizes = ["4xlarge", "8xlarge", "16xlarge"]
+  allowed_instance_types = coalesce(var.node_group_properties["instance_requirements"]["allowed_instance_types"], local.default_instance_types_amd64)
+  allowed_instance_sizes = coalesce(var.node_group_properties["instance_requirements"]["allowed_instance_sizes"], local.default_instance_sizes)
   instance_list = flatten([
-    for type in try(var.node_group_properties["instance_requirements"]["allowed_instance_types"], local.default_instance_types_amd64):[
-      for size in try(var.node_group_properties["instance_requirements"]["allowed_instance_size"], local.default_instance_sizes): "${type}.${size}"
+    for type in local.allowed_instance_types:[
+      for size in local.allowed_instance_sizes: "${type}.${size}"
     ]
   ])
 }
@@ -24,6 +26,8 @@ resource "aws_eks_node_group" "node-group" {
   subnet_ids      = var.node_group_properties["subnet_ids"]
   capacity_type   = var.node_group_properties["capacity_type"]
   labels          = var.node_group_properties["labels"]
+  # tags are not required here, left to keep backwards compatible
+  tags = merge(local.default_tags, var.node_group_properties["tags"])
   dynamic taint {
     for_each = var.node_group_properties["taints"]
     content {

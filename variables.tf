@@ -31,6 +31,10 @@ variable "core_node_group_properties" {
   type = map(object({
     subnet_ids = list(string)
     tags = optional(map(string), {})
+    instance_requirements = optional(object({
+      allowed_instance_types = optional(list(string))
+      allowed_instance_sizes = optional(list(string))
+    }), { allowed_instance_types = null, allowed_instance_sizes = null })
     user_data_suffix = optional(string, "")
   }))
 }

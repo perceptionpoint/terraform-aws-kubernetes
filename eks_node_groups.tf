@@ -18,8 +18,8 @@ locals {
       subnet_ids = var.core_node_group_properties["coredns"]["subnet_ids"]
       capacity_type = "ON_DEMAND"
       instance_requirements = {
-        allowed_instance_types = ["t3"]
-        allowed_instance_size = ["medium"]
+        allowed_instance_types = coalesce(var.core_node_group_properties["coredns"]["instance_requirements"]["allowed_instance_types"], ["t3"])
+        allowed_instance_sizes = coalesce(var.core_node_group_properties["coredns"]["instance_requirements"]["allowed_instance_sizes"], ["medium"])
       }
       min_size = 2
       tags = var.core_node_group_properties["coredns"]["tags"]
@@ -35,6 +35,7 @@ locals {
       tags = var.core_node_group_properties["karpenter-node"]["tags"]
       labels = { componentType = "karpenter-node" }
       taints = [{ key = "perception-point.io/karpenter-node" }]
+      instance_requirements = var.core_node_group_properties["karpenter-node"]["instance_requirements"]
       user_data_suffix = var.core_node_group_properties["karpenter-node"]["user_data_suffix"]
     }
     system-critical = {
@@ -45,6 +46,7 @@ locals {
       tags = var.core_node_group_properties["system-critical"]["tags"]
       labels = { componentType = "system-critical" }
       taints = [{ key = "perception-point.io/system-critical" }]
+      instance_requirements = var.core_node_group_properties["system-critical"]["instance_requirements"]
       user_data_suffix = var.core_node_group_properties["system-critical"]["user_data_suffix"]
     }
     nat-worker = {
@@ -54,6 +56,7 @@ locals {
       tags = var.core_node_group_properties["nat-worker"]["tags"]
       labels = { componentType = "smtp-worker-karpenter" }
       taints = [{ key = "perception-point.io/nat" }]
+      instance_requirements = var.core_node_group_properties["nat-worker"]["instance_requirements"]
       user_data_suffix = var.core_node_group_properties["nat-worker"]["user_data_suffix"]
     }
     gpu-worker = {
@@ -62,15 +65,14 @@ locals {
       capacity_type = "SPOT"
       ami_type = "AL2_x86_64_GPU"
       instance_requirements = {
-        allowed_instance_types = ["g4dn"]
-        allowed_instance_size = ["xlarge"]
+        allowed_instance_types = coalesce(var.core_node_group_properties["gpu-worker"]["instance_requirements"]["allowed_instance_types"], ["g4dn"])
+        allowed_instance_sizes = coalesce(var.core_node_group_properties["gpu-worker"]["instance_requirements"]["allowed_instance_sizes"], ["xlarge"])
       }
       tags = var.core_node_group_properties["gpu-worker"]["tags"]
       labels = { componentType = "gpu-worker" }
       taints = [{ key = "nvidia.com/gpu" }]
       user_data_suffix =<<EOF
-${local.gpu_user_data}
-${var.core_node_group_properties["gpu-worker"]["user_data_suffix"]}
+${trimspace(format("%s\n%s",local.gpu_user_data,var.core_node_group_properties["gpu-worker"]["user_data_suffix"]))}
   EOF
     }
   }
@@ -82,5 +84,5 @@ sudo yum-config-manager --disable amzn2-nvidia
 sudo yum clean expire-cache
 sudo yum install -y nvidia-docker2
 sudo yum-config-manager --enable amzn2-nvidia
-  EOF
+EOF
 }

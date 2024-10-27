@@ -8,6 +8,11 @@ mkdir /filebeat-queue
 mount /dev/xvdb /filebeat-queue
 EOF
 
+  user_data_suffix =<<EOF
+${var.node_group_properties["user_data_suffix"]}
+--//
+EOF
+
   user_data =<<EOF
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="//"
@@ -17,8 +22,7 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
 ${local.base_user_data}
-${var.node_group_properties["user_data_suffix"]}
---//
+${trimspace(local.user_data_suffix)}
 
 EOF
 
@@ -41,7 +45,6 @@ EOF
     }
   }
   default_tags = {
-    "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned"
     Name = "eks-node-group/${var.node_group_properties["name"]}"
     monitoring = "True"
     sub-product = "eks-nodes"
