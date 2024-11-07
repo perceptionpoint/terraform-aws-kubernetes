@@ -4,10 +4,10 @@ variable "node_group_properties" {
     subnet_ids = list(string)
     capacity_type = string
     ami_type = optional(string, "AL2_x86_64")
-    instance_requirements = object({
+    instance_requirements = optional(object({
       allowed_instance_types = list(string)
       allowed_instance_sizes = list(string)
-    })
+    }), { allowed_instance_types = null, allowed_instance_sizes = null })
     user_data_suffix = optional(string, "")
     imdsv2_enabled = optional(bool, true)
     block_device_mappings = optional(map(object({
