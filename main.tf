@@ -88,8 +88,8 @@ resource "local_file" "kubeconfig_metadata_output_file" {
   content = yamlencode({
     "cluster_name": var.eks_properties["name"],
     "cluster_region": data.aws_region.current.name,
-    "assume_role": module.security.DescribeEksEndpointsRoleArn,
-    "aliases": var.kubeconfig_cluster_aliases
+    "credentials": { "assume_role_arn": module.security.DescribeEksEndpointsRoleArn },
+    "aliases": [ for e in var.kubeconfig_cluster_aliases : { for k, v in e : k => v if v != null } ]
   })
 }
 

@@ -56,7 +56,11 @@ variable "kubeconfig_metadata_output_file" {
 }
 
 variable "kubeconfig_cluster_aliases" {
-  type = list(string)
+  type = list(object({
+    context_name = string
+    namespace = optional(string)
+    user_name = optional(string)
+  }))
   default = []
 }
 
