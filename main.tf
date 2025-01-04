@@ -7,11 +7,20 @@ resource "aws_eks_cluster" "eks" {
 
   enabled_cluster_log_types = [ "authenticator", ]
 
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = false
+  }
+
   vpc_config {
     subnet_ids = var.eks_subnet_ids
 
     endpoint_private_access = true
     endpoint_public_access = false
+  }
+
+  lifecycle {
+    ignore_changes = [ access_config[0].bootstrap_cluster_creator_admin_permissions ]
   }
 }
 
@@ -82,4 +91,32 @@ resource "local_file" "kubeconfig_metadata_output_file" {
     "assume_role": module.security.DescribeEksEndpointsRoleArn,
     "aliases": var.kubeconfig_cluster_aliases
   })
+}
+
+data "aws_iam_roles" "eks_access_entries_roles" {
+  for_each = {for k, v in var.eks_access_policy_associations : k => v if v["principal_type"] == "role" && v["principal_name_pattern"] != null }
+
+  name_regex = each.value["principal_name_pattern"]
+}
+
+resource "aws_eks_access_entry" "eks_access_entry" {
+  for_each = var.eks_access_policy_associations
+
+  cluster_name      = aws_eks_cluster.eks.name
+  principal_arn     = (each.value["principal_type"] == "role" && each.value["principal_name_pattern"] != null)? tolist(data.aws_iam_roles.eks_access_entries_roles[each.key].arns)[0] : each.value["principal_arn"]
+  type              = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "eks_access_policy_association" {
+  for_each = var.eks_access_policy_associations
+  depends_on = [ aws_eks_access_entry.eks_access_entry ]
+
+  cluster_name  = aws_eks_cluster.eks.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/${each.value["policy_name"]}"
+  principal_arn = (each.value["principal_type"] == "role" && each.value["principal_name_pattern"] != null)? tolist(data.aws_iam_roles.eks_access_entries_roles[each.key].arns)[0] : each.value["principal_arn"]
+
+  access_scope {
+    type = each.value["access_scope_type"]
+    namespaces = each.value["access_scope_namespaces"]
+  }
 }
