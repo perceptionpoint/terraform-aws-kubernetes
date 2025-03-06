@@ -50,20 +50,17 @@ variable "karpenter_role_name_extension" {
   type = string
   default = ""
 }
-variable "kubeconfig_metadata_output_file" {
-  type = string
-  default = null
+variable "kubeconfig" {
+  type = object({
+    metadata_output_file = optional(string)
+    cluster_aliases = optional(list(object({
+      context_name = string
+      namespace = optional(string)
+      user_name = optional(string)
+    })), [])
+    aws_profile = optional(string)
+  })
 }
-
-variable "kubeconfig_cluster_aliases" {
-  type = list(object({
-    context_name = string
-    namespace = optional(string)
-    user_name = optional(string)
-  }))
-  default = []
-}
-
 variable "describe_eks_endpoints_assuming_account_id" {
   type = string
   default = null

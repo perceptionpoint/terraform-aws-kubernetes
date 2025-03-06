@@ -85,14 +85,15 @@ module "karpenter" {
 data "aws_region" "current" {}
 
 resource "local_file" "kubeconfig_metadata_output_file" {
-  count = var.kubeconfig_metadata_output_file == null ? 0 : 1
+  count = var.kubeconfig["metadata_output_file"] == null ? 0 : 1
 
-  filename = var.kubeconfig_metadata_output_file
+  filename = var.kubeconfig["metadata_output_file"]
   content = yamlencode({
     "cluster_name": var.eks_properties["name"],
     "cluster_region": data.aws_region.current.name,
     "credentials": { "assume_role_arn": module.security.DescribeEksEndpointsRoleArn },
-    "aliases": [ for e in var.kubeconfig_cluster_aliases : { for k, v in e : k => v if v != null } ]
+    "aliases": [ for e in var.kubeconfig["cluster_aliases"] : { for k, v in e : k => v if v != null } ],
+    "aws_profile": var.kubeconfig["aws_profile"]
   })
 }
 
