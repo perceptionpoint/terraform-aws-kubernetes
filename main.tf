@@ -20,7 +20,7 @@ resource "aws_eks_cluster" "eks" {
   }
 
   lifecycle {
-    ignore_changes = [ 
+    ignore_changes = [
       access_config[0].bootstrap_cluster_creator_admin_permissions,
       bootstrap_self_managed_addons,
     ]
@@ -103,8 +103,21 @@ data "aws_iam_roles" "eks_access_entries_roles" {
   name_regex = each.value["principal_name_pattern"]
 }
 
+locals {
+  eks_access_policy_associations = {
+    karpenter_node_role = {
+      policy_name = "AmazonEKSClusterAdminPolicy"
+      principal_arn = module.karpenter[0].node_iam_role_arn
+      principal_type = "role"
+      access_scope_type = "cluster"
+      principal_name_pattern = null
+      access_scope_namespaces = null
+    }
+  }
+}
+
 resource "aws_eks_access_entry" "eks_access_entry" {
-  for_each = var.eks_access_policy_associations
+  for_each = merge(local.eks_access_policy_associations, var.eks_access_policy_associations)
 
   cluster_name      = aws_eks_cluster.eks.name
   principal_arn     = (each.value["principal_type"] == "role" && each.value["principal_name_pattern"] != null)? tolist(data.aws_iam_roles.eks_access_entries_roles[each.key].arns)[0] : each.value["principal_arn"]
@@ -112,7 +125,7 @@ resource "aws_eks_access_entry" "eks_access_entry" {
 }
 
 resource "aws_eks_access_policy_association" "eks_access_policy_association" {
-  for_each = var.eks_access_policy_associations
+  for_each = merge(local.eks_access_policy_associations, var.eks_access_policy_associations)
   depends_on = [ aws_eks_access_entry.eks_access_entry ]
 
   cluster_name  = aws_eks_cluster.eks.name
