@@ -67,12 +67,13 @@ variable "describe_eks_endpoints_assuming_account_id" {
 }
 variable "eks_access_policy_associations" {
   type = map(object({
-    policy_name = string
+    policy_name = optional(string)
     principal_type = optional(string, "role")
     principal_arn = optional(string)
     principal_name_pattern = optional(string)
-    access_scope_type = string
+    access_scope_type = optional(string)
     access_scope_namespaces = optional(list(string))
+    access_entry_type = optional(string, "STANDARD")
   }))
   default = {}
 }
