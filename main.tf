@@ -128,7 +128,7 @@ resource "aws_eks_access_entry" "eks_access_entry" {
 }
 
 resource "aws_eks_access_policy_association" "eks_access_policy_association" {
-  for_each = { for k,v in merge(local.eks_access_policy_associations, var.eks_access_policy_associations) : k => v if v["access_entry_type"] == "STANDARD" }
+  for_each = { for k,v in merge(local.eks_access_policy_associations, var.eks_access_policy_associations) : k => v if v["policy_name"] != null }
   depends_on = [ aws_eks_access_entry.eks_access_entry ]
 
   cluster_name  = aws_eks_cluster.eks.name
