@@ -106,26 +106,29 @@ data "aws_iam_roles" "eks_access_entries_roles" {
 locals {
   eks_access_policy_associations = {
     karpenter_node_role = {
-      policy_name = "AmazonEKSClusterAdminPolicy"
+      policy_name = null
       principal_arn = module.karpenter[0].node_iam_role_arn
       principal_type = "role"
-      access_scope_type = "cluster"
+      access_scope_type = null
       principal_name_pattern = null
       access_scope_namespaces = null
+      access_entry_type = "EC2_LINUX"
     }
   }
 }
+
+
 
 resource "aws_eks_access_entry" "eks_access_entry" {
   for_each = merge(local.eks_access_policy_associations, var.eks_access_policy_associations)
 
   cluster_name      = aws_eks_cluster.eks.name
   principal_arn     = (each.value["principal_type"] == "role" && each.value["principal_name_pattern"] != null)? tolist(data.aws_iam_roles.eks_access_entries_roles[each.key].arns)[0] : each.value["principal_arn"]
-  type              = "STANDARD"
+  type              = each.value["access_entry_type"]
 }
 
 resource "aws_eks_access_policy_association" "eks_access_policy_association" {
-  for_each = merge(local.eks_access_policy_associations, var.eks_access_policy_associations)
+  for_each = { for k,v in merge(local.eks_access_policy_associations, var.eks_access_policy_associations) : k => v if v["policy_name"] != null }
   depends_on = [ aws_eks_access_entry.eks_access_entry ]
 
   cluster_name  = aws_eks_cluster.eks.name
