@@ -36,7 +36,8 @@ locals {
           DISABLE_POD_V6 = "true"
         }
         podAnnotations = {
-          "prometheus.io/port" = "61678"
+          "prometheus.io/port" = "61678",
+          "prometheus.io/scrape" = "true"
         }
       })
     }
