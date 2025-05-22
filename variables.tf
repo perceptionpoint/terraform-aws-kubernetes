@@ -67,7 +67,7 @@ variable "describe_eks_endpoints_assuming_account_id" {
 }
 variable "eks_access_policy_associations" {
   type = map(object({
-    policy_name = optional(string)
+    policy_names = optional(list(string), [])
     principal_type = optional(string, "role")
     principal_arn = optional(string)
     principal_name_pattern = optional(string)
