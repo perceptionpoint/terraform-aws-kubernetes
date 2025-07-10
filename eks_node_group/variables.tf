@@ -10,6 +10,7 @@ variable "node_group_properties" {
     }), { allowed_instance_types = null, allowed_instance_sizes = null })
     user_data_suffix = optional(string, "")
     imdsv2_enabled = optional(bool, true)
+    extra_eks_node_sgs = optional(list(string),[])
     block_device_mappings = optional(map(object({
       device_name = string
       ebs = object({
