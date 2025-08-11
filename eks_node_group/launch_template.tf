@@ -53,7 +53,7 @@ EOF
 
 resource aws_launch_template "launch-template" {
   user_data =  "${base64encode(local.user_data)}"
-  vpc_security_group_ids = [var.eks_node_sg]
+  vpc_security_group_ids = concat([var.eks_node_sg], var.node_group_properties["extra_eks_node_sgs"])
   update_default_version = true
   metadata_options {
     http_protocol_ipv6 = "disabled"
