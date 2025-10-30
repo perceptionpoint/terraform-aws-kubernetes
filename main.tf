@@ -35,6 +35,15 @@ resource "aws_iam_openid_connect_provider" "oidc-provider" {
   client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.thumbprint-list.certificates.0.sha1_fingerprint]
   url = aws_eks_cluster.eks.identity.0.oidc.0.issuer
+
+  # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
+  # AWS secures communication with OIDC identity providers (IdPs) using our library of trusted root certificate authorities (CAs) to verify the JSON Web Key Set (JWKS) endpoint's TLS certificate.
+  # If your OIDC IdP relies on a certificate that is not signed by one of these trusted CAs, only then we secure communication using the thumbprints set in the IdP's configuration.
+  # AWS will fall back to thumbprint verification if we are unable to retrieve the TLS certificate or if TLS v1.3 is required.
+  lifecycle {
+    ignore_changes = [thumbprint_list]
+  }
+
 }
 
 module "security" {
