@@ -14,7 +14,7 @@ resource "aws_eks_cluster" "eks" {
 
   vpc_config {
     subnet_ids = var.eks_subnet_ids
-
+    security_group_ids = var.eks_properties["extra_cluster_security_group_ids"]
     endpoint_private_access = true
     endpoint_public_access = false
   }
@@ -99,7 +99,7 @@ resource "local_file" "kubeconfig_metadata_output_file" {
   filename = var.kubeconfig["metadata_output_file"]
   content = yamlencode({
     "cluster_name": var.eks_properties["name"],
-    "cluster_region": data.aws_region.current.name,
+    "cluster_region": data.aws_region.current.region,
     "credentials": { "assume_role_arn": module.security.DescribeEksEndpointsRoleArn },
     "aliases": [ for e in var.kubeconfig["cluster_aliases"] : { for k, v in e : k => v if v != null } ],
     "aws_profile": var.kubeconfig["aws_profile"]
