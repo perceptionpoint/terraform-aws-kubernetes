@@ -1,6 +1,6 @@
 variable "eks_properties" { type = object({
         name = string
-        version = number
+        version = string
         node_security_group_name = string
         extra_cluster_security_group_ids = list(string)
         cluster_role_name = string
