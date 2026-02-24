@@ -3,7 +3,7 @@ variable "node_group_properties" {
     name = string
     subnet_ids = list(string)
     capacity_type = string
-    ami_type = optional(string, "AL2_x86_64")
+    ami_type = optional(string, "AL2023_x86_64_STANDARD")
     instance_requirements = optional(object({
       allowed_instance_types = list(string)
       allowed_instance_sizes = list(string)
