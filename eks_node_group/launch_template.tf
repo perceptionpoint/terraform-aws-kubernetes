@@ -1,11 +1,30 @@
 locals {
-  base_user_data =<<EOF
+
+  base_user_data = <<-EOF
+%{ if var.node_group_properties["name"] == "gpu-worker" }
+Content-Type: application/node.eks.aws; charset="us-ascii"
+#!/bin/bash
+
 echo "$(jq '.healthzBindAddress="0.0.0.0"' /etc/kubernetes/kubelet/kubelet-config.json)" > /etc/kubernetes/kubelet/kubelet-config.json
 mkdir /var/log/pplogger
 sudo chown -R 1000:000 /var/log/pplogger
-mkfs -t xfs  /dev/xvdb
-mkdir /filebeat-queue
-mount /dev/xvdb /filebeat-queue
+%{ else }
+Content-Type: application/node.eks.aws; charset="us-ascii"
+
+  apiVersion: node.eks.aws/v1alpha1
+  kind: NodeConfig
+  spec:
+    kubelet:
+      config:
+        healthzBindAddress: "0.0.0.0"
+        registryPullQPS: 50
+--BOUNDARY
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+mkdir /var/log/pplogger
+sudo chown -R 1000:000 /var/log/pplogger
+%{ endif }
 EOF
 
   user_data_suffix =<<EOF
@@ -18,9 +37,7 @@ MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="//"
 
 --//
-Content-Type: text/x-shellscript; charset="us-ascii"
 
-#!/bin/bash
 ${local.base_user_data}
 ${trimspace(local.user_data_suffix)}
 
@@ -33,14 +50,6 @@ EOF
           iops = 3000
           throughput = 128
           volume_size = 80
-      }
-    }
-    pplogger = {
-      device_name = "/dev/xvdb"
-      ebs = {
-          iops = 500
-          throughput = 128
-          volume_size = 30
       }
     }
   }
