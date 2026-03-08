@@ -50,6 +50,9 @@ locals {
       resolve_conflicts_on_create = "OVERWRITE"
       service_account_role_arn = module.security.eks_ebs_csi_driver_role_arn
       configuration_values = jsonencode({
+        defaultStorageClass = {
+          enabled = true
+        }
         controller = {
           tolerations = [
             {
